@@ -1,35 +1,75 @@
-import { Tabs } from 'expo-router';
+import { StatusBar } from 'react-native';
 import React from 'react';
+import { Tabs } from 'expo-router';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+const TabLayouts = () => {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <>
+      <StatusBar backgroundColor="#1ca4a4" />
+      <Tabs
+        screenOptions={{
+          tabBarInactiveTintColor: '#6B7280',
+          tabBarStyle: {
+            backgroundColor: '#FDFDFD',
+            borderTopWidth: 1,
+            borderTopColor: '#E5E7EB',
+            height: 60,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            marginBottom: 5,
+          },
+          headerShown: false,
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        {/* Home - Custom Color */}
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name="home"
+                size={24}
+                color={focused ? '#107ed1' : '#6B7280'}
+              />
+            ),
+          }}
+        />
+
+        {/* Feedback - Custom Color (if you have this screen) */}
+        <Tabs.Screen
+          name="feedback"
+          options={{
+            title: 'Feedback',
+            tabBarIcon: ({ focused }) => (
+              <MaterialCommunityIcons
+                name="message-outline"
+                size={24}
+                color={focused ? '#107ed1' : '#6B7280'}
+              />
+            ),
+          }}
+        />
+
+        {/* Profile - Custom Color */}
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ focused }) => (
+              <FontAwesome5
+                name="user-alt"
+                size={24}
+                color={focused ? '#107ed1' : '#6B7280'}
+              />
+            ),
+          }}
+        />
+      </Tabs>
+    </>
   );
-}
+};
+
+export default TabLayouts;
