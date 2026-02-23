@@ -1,12 +1,8 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import "../global.css";
+import "@/global.css";
 import "react-native-reanimated";
+import AuthProvider from "@/context/AuthContext";
 
 
 export const unstable_settings = {
@@ -16,7 +12,7 @@ export const unstable_settings = {
 export default function RootLayout() {
 
   return (
-    <>
+    <AuthProvider>
       <Stack>
         <Stack.Screen
           name="index"
@@ -26,6 +22,6 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
-    </>
+    </AuthProvider>
   );
 }
