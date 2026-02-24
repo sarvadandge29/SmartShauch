@@ -221,12 +221,12 @@ const ToiletDetailModal: React.FC<ToiletDetailModalProps> = ({
                       <View style={{ 
                         height: 8, 
                         borderRadius: 4,
-                        width: `${toilet.waterLevel}%`,
-                        backgroundColor: getWaterLevelColor(toilet.waterLevel)
+                        width: `${toilet.water_level}%`,
+                        backgroundColor: getWaterLevelColor(toilet.water_level)
                       }} />
                     </View>
                     <Text style={{ fontWeight: '600', color: darkBlue, fontFamily: getFontFamily('sans') }}>
-                      {toilet.waterLevel}%
+                      {toilet.water_level}%
                     </Text>
                   </View>
                 </View>
@@ -237,7 +237,7 @@ const ToiletDetailModal: React.FC<ToiletDetailModalProps> = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                   <Icon name="access-time" size={20} color={grayText} />
                   <Text style={{ marginLeft: 8, color: darkBlue, fontFamily: getFontFamily('sans') }}>
-                    {toilet.openTime}
+                    {toilet.open_time}
                   </Text>
                 </View>
                 
@@ -274,7 +274,7 @@ const ToiletDetailModal: React.FC<ToiletDetailModalProps> = ({
                 marginBottom: 16,
               }}>
                 <Text style={{ fontSize: 14, color: darkBlue, fontFamily: getFontFamily('sans'), lineHeight: 20 }}>
-                  Water Status: <Text style={{ fontWeight: '600' }}>{toilet.waterStatus}</Text>
+                  Water Status: <Text style={{ fontWeight: '600' }}>{toilet.water_status}</Text>
                 </Text>
               </View>
             </View>

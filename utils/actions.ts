@@ -67,3 +67,14 @@ export const login = async (email: string, password: string) => {
 
   return { user, profile };
 };
+
+export const getToiletsData = async () => {
+  const { data, error } = await supabase.from("toilets").select("*");
+
+  if (error) {
+    console.error("Error fetching toilets data:", error);
+    throw error;
+  }
+
+  return data;
+};
