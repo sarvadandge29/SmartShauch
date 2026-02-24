@@ -13,10 +13,11 @@ import { Fonts } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getFontFamily } from '@/utils/fonts';
 
+
 const { height } = Dimensions.get('window');
 
 export default function App() {
-  const { session, loading } = useAuth();
+  const { session, loading, user } = useAuth();
 
   const primaryBlue = '#1E3A8A';
   const secondaryBlue = '#2563EB';
@@ -56,8 +57,6 @@ export default function App() {
 
   return (
     <View style={{ flex: 1, backgroundColor: primaryBlue }}>
-      <StatusBar barStyle="light-content" backgroundColor={primaryBlue} />
-
       {/* Top Image Section */}
       <View style={{ height: height * 0.65 }} className="justify-center items-center">
         <Image

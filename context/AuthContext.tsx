@@ -31,7 +31,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             const { data, error } = await supabase
                 .from("users")
                 .select("*")
-                .eq("userid", userId)
+                .eq("id", userId)
                 .single();
 
             if (error) throw error;
@@ -71,6 +71,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             async (event, session) => {
                 setSession(session);
                 if (session?.user) {
+                    console.log("Auth state changed, fetching user...");
                     await fetchUser(session.user.id);
                 } else {
                     setUser(null);
