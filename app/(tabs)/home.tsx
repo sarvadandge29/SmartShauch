@@ -1,22 +1,24 @@
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { Fonts } from '@/constants/theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ToiletCard, { ToiletData } from '@/components/ToiletCard';
+import ToiletDetailModal from '@/components/ToiletDetailModal';
 
 const { width } = Dimensions.get('window');
 
 // Blue theme colors
-const primaryBlue = '#1E3A8A'; // Dark blue
-const secondaryBlue = '#2563EB'; // Medium blue
-const lightBlue = '#DBEAFE'; // Light blue
+const primaryBlue = '#1E3A8A';
+const secondaryBlue = '#2563EB';
+const lightBlue = '#DBEAFE';
 const white = '#FFFFFF';
-const darkBlue = '#0F172A'; // Very dark blue for text
+const darkBlue = '#0F172A';
 const grayText = '#64748B';
 const lightGray = '#F1F5F9';
 
-// Sample nearby toilets data
-const nearbyToilets = [
+// Sample nearby toilets data with coordinates
+const nearbyToilets: ToiletData[] = [
   {
     id: 1,
     name: 'City Center Mall',
@@ -29,6 +31,8 @@ const nearbyToilets = [
     openTime: '24/7',
     rating: 4.8,
     accessible: true,
+    latitude: 37.78825,
+    longitude: -122.4324,
   },
   {
     id: 2,
@@ -42,6 +46,8 @@ const nearbyToilets = [
     openTime: '6:00 AM - 10:00 PM',
     rating: 4.2,
     accessible: true,
+    latitude: 37.78925,
+    longitude: -122.4344,
   },
   {
     id: 3,
@@ -55,6 +61,8 @@ const nearbyToilets = [
     openTime: '24/7',
     rating: 3.5,
     accessible: false,
+    latitude: 37.78725,
+    longitude: -122.4304,
   },
   {
     id: 4,
@@ -68,6 +76,8 @@ const nearbyToilets = [
     openTime: '9:00 AM - 8:00 PM',
     rating: 4.5,
     accessible: true,
+    latitude: 37.78625,
+    longitude: -122.4334,
   },
   {
     id: 5,
@@ -81,35 +91,15 @@ const nearbyToilets = [
     openTime: '5:00 AM - 12:00 AM',
     rating: 3.8,
     accessible: true,
+    latitude: 37.78525,
+    longitude: -122.4314,
   },
 ];
 
-// Get cleanliness color
-const getCleanlinessColor = (cleanliness: string) => {
-  switch (cleanliness) {
-    case 'Excellent':
-      return '#10B981'; // Green
-    case 'Very Good':
-      return '#34D399'; // Light green
-    case 'Good':
-      return '#FBBF24'; // Yellow
-    case 'Fair':
-      return '#F97316'; // Orange
-    case 'Needs Attention':
-      return '#EF4444'; // Red
-    default:
-      return grayText;
-  }
-};
-
-// Get water level color
-const getWaterLevelColor = (level: number) => {
-  if (level >= 70) return '#10B981'; // Green
-  if (level >= 40) return '#FBBF24'; // Yellow
-  return '#EF4444'; // Red
-};
-
 export default function Home() {
+  const [selectedToilet, setSelectedToilet] = useState<ToiletData | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
   // Safely get font family
   const getFontFamily = (type: 'sans' | 'serif' | 'rounded' | 'mono') => {
     if (Fonts && Fonts[type]) {
@@ -122,6 +112,26 @@ export default function Home() {
       mono: 'Courier New',
     };
     return fallbacks[type];
+  };
+
+  const handleToiletPress = (toilet: ToiletData) => {
+    setSelectedToilet(toilet);
+    setModalVisible(true);
+  };
+
+  const handleViewDetails = (toilet: ToiletData) => {
+    setSelectedToilet(toilet);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedToilet(null);
+  };
+
+  const handleGetDirections = (toilet: ToiletData) => {
+    console.log('Getting directions to:', toilet.name);
+    // The actual directions will open via Linking in the modal component
   };
 
   return (
@@ -187,133 +197,27 @@ export default function Home() {
           </Text>
         </View>
 
-        {/* Toilets List */}
+        {/* Toilets List - Using Card Component */}
         {nearbyToilets.map((toilet) => (
-          <TouchableOpacity
+          <ToiletCard
             key={toilet.id}
-            className="bg-white rounded-xl p-4 mb-4 shadow-sm"
-            style={{ 
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 3,
-              elevation: 2,
-            }}
-            activeOpacity={0.7}
-            onPress={() => console.log('View details:', toilet.name)}
-          >
-            {/* Header with name and code */}
-            <View className="flex-row justify-between items-center">
-              <View className="flex-1">
-                <Text 
-                  className="text-lg font-bold"
-                  style={{ color: primaryBlue, fontFamily: getFontFamily('serif') }}
-                >
-                  {toilet.name}
-                </Text>
-                <Text 
-                  className="text-xs mt-1"
-                  style={{ color: secondaryBlue, fontFamily: getFontFamily('mono') }}
-                >
-                  {toilet.code}
-                </Text>
-              </View>
-              <View className="bg-blue-50 px-3 py-1 rounded-full" style={{ backgroundColor: lightBlue }}>
-                <Text 
-                  className="text-xs font-semibold"
-                  style={{ color: primaryBlue, fontFamily: getFontFamily('sans') }}
-                >
-                  {toilet.distance}
-                </Text>
-              </View>
-            </View>
-
-            {/* Cleanliness and Water Level */}
-            <View className="flex-row justify-between mt-3">
-              <View className="flex-1">
-                <Text 
-                  className="text-xs mb-1"
-                  style={{ color: grayText, fontFamily: getFontFamily('sans') }}
-                >
-                  Cleanliness
-                </Text>
-                <Text 
-                  className="text-sm font-semibold"
-                  style={{ color: getCleanlinessColor(toilet.cleanliness), fontFamily: getFontFamily('sans') }}
-                >
-                  {toilet.cleanliness}
-                </Text>
-              </View>
-              
-              <View className="flex-1">
-                <Text 
-                  className="text-xs mb-1"
-                  style={{ color: grayText, fontFamily: getFontFamily('sans') }}
-                >
-                  Water Level
-                </Text>
-                <View className="flex-row items-center">
-                  <View className="w-16 h-2 bg-gray-200 rounded-full mr-2">
-                    <View 
-                      className="h-2 rounded-full"
-                      style={{ 
-                        width: `${toilet.waterLevel}%`,
-                        backgroundColor: getWaterLevelColor(toilet.waterLevel)
-                      }}
-                    />
-                  </View>
-                  <Text 
-                    className="text-sm font-semibold"
-                    style={{ color: darkBlue, fontFamily: getFontFamily('sans') }}
-                  >
-                    {toilet.waterLevel}%
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Additional Info Row */}
-            <View className="flex-row items-center mt-3">
-              <Icon name="access-time" size={16} color={grayText} />
-              <Text className="text-xs ml-1 mr-3" style={{ color: grayText, fontFamily: getFontFamily('sans') }}>
-                {toilet.openTime}
-              </Text>
-              
-              {toilet.accessible && (
-                <>
-                  <Icon name="accessible" size={16} color={secondaryBlue} />
-                  <Text className="text-xs ml-1" style={{ color: secondaryBlue, fontFamily: getFontFamily('sans') }}>
-                    Accessible
-                  </Text>
-                </>
-              )}
-            </View>
-
-            {/* View Details Link */}
-            <View className="flex-row justify-end mt-3 pt-2 border-t" style={{ borderColor: lightGray }}>
-              <TouchableOpacity className="flex-row items-center">
-                <Text 
-                  className="text-sm mr-1"
-                  style={{ color: secondaryBlue, fontFamily: getFontFamily('sans') }}
-                >
-                  View Details
-                </Text>
-                <Icon name="arrow-forward" size={16} color={secondaryBlue} />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+            toilet={toilet}
+            onPress={handleToiletPress}
+            onViewDetails={handleViewDetails}
+          />
         ))}
 
         {/* Bottom spacing */}
         <View className="h-20" />
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View 
-        className="flex-row justify-around items-center py-3 px-6 border-t"
-        style={{ backgroundColor: white, borderColor: lightGray }}
-      >
-      </View>
+      {/* Detail Modal */}
+      <ToiletDetailModal
+        visible={modalVisible}
+        toilet={selectedToilet}
+        onClose={handleCloseModal}
+        onGetDirections={handleGetDirections}
+      />
     </View>
   );
 }
