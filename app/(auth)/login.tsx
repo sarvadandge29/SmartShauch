@@ -31,9 +31,6 @@ const Login = () => {
 
       const { user, profile } = await login(email, password);
 
-      console.log("Logged in user:", user);
-      console.log("Profile data:", profile);
-
       router.replace("/(tabs)/home");
     } catch (error: any) {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
