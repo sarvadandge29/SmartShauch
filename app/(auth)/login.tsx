@@ -35,6 +35,8 @@ const Login = () => {
         router.replace("/(tabs)/home");
       } else if (user.role === "admin") {
         router.replace("/(admin)/dashboard" as any);
+      } else if (user.role === "maintenance") {
+        router.replace("/(maintenance)/home" as any);
       }
     } catch (error: any) {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
