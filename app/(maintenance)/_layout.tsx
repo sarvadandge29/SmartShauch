@@ -1,7 +1,7 @@
 import { StatusBar } from 'react-native';
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 const MaintenceLayouts = () => {
   return (
@@ -23,7 +23,7 @@ const MaintenceLayouts = () => {
           headerShown: false,
         }}
       >
-        {/* Home - Custom Color */}
+        {/* Home */}
         <Tabs.Screen
           name="home"
           options={{
@@ -38,7 +38,22 @@ const MaintenceLayouts = () => {
           }}
         />
 
-        {/* Profile - Custom Color */}
+        {/* Chat */}
+        <Tabs.Screen
+          name="chat"
+          options={{
+            title: 'Chat',
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name="chatbubble-ellipses"
+                size={24}
+                color={focused ? '#107ed1' : '#6B7280'}
+              />
+            ),
+          }}
+        />
+
+        {/* Profile */}
         <Tabs.Screen
           name="profile"
           options={{

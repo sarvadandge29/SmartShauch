@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "expo-router";
 
 interface Staff {
   id: string;
@@ -32,11 +33,12 @@ const StaffPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedStaff, setExpandedStaff] = useState<string | null>(null);
+  const router = useRouter();
 
   // Mock tasks data for demonstration
   const mockTasks: Record<string, MockTask[]> = {
     // This will be populated with real data when you create the tasks table
-    "staff1": [
+    staff1: [
       {
         id: "task1",
         toiletName: "Main Building - Ground Floor",
@@ -50,7 +52,7 @@ const StaffPage = () => {
         status: "completed",
       },
     ],
-    "staff2": [
+    staff2: [
       {
         id: "task3",
         toiletName: "Sports Complex - Men",
@@ -84,6 +86,13 @@ const StaffPage = () => {
     setRefreshing(true);
     await fetchStaff();
     setRefreshing(false);
+  };
+
+  const handleOpenChat = (memberId: string, memberName: string) => {
+    router.push({
+      pathname: "/chatRoom",
+      params: { memberId, memberName },
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -127,12 +136,14 @@ const StaffPage = () => {
       <View className="bg-white border-b border-gray-200 px-4 py-4">
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-2xl font-bold text-gray-900">Maintenance Staff</Text>
+            <Text className="text-2xl font-bold text-gray-900">
+              Maintenance Staff
+            </Text>
             <Text className="text-sm text-gray-600 mt-1">
               {staff.length} staff members
             </Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onRefresh}
             className="bg-blue-50 p-2 rounded-lg"
           >
@@ -145,7 +156,9 @@ const StaffPage = () => {
       <View className="flex-row px-4 py-4 space-x-3">
         <View className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <View className="flex-row items-center justify-between">
-            <Text className="text-2xl font-bold text-gray-900">{staff.length}</Text>
+            <Text className="text-2xl font-bold text-gray-900">
+              {staff.length}
+            </Text>
             <Ionicons name="people" size={24} color="#2563EB" />
           </View>
           <Text className="text-xs text-gray-600 mt-1">Total Staff</Text>
@@ -171,7 +184,11 @@ const StaffPage = () => {
         className="flex-1 px-4"
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#2563EB"]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2563EB"]}
+          />
         }
       >
         {staff.length > 0 ? (
@@ -182,7 +199,11 @@ const StaffPage = () => {
             >
               {/* Staff Header - Always Visible */}
               <TouchableOpacity
-                onPress={() => setExpandedStaff(expandedStaff === member.id ? null : member.id)}
+                onPress={() =>
+                  setExpandedStaff(
+                    expandedStaff === member.id ? null : member.id,
+                  )
+                }
                 className="p-4"
                 activeOpacity={0.7}
               >
@@ -193,28 +214,36 @@ const StaffPage = () => {
                       {member.name.charAt(0).toUpperCase()}
                     </Text>
                   </View>
-                  
+
                   {/* Staff Info */}
                   <View className="flex-1 ml-3">
                     <View className="flex-row items-center justify-between">
                       <Text className="font-semibold text-gray-900 text-base">
                         {member.name}
                       </Text>
-                      <Ionicons 
-                        name={expandedStaff === member.id ? "chevron-up" : "chevron-down"} 
-                        size={20} 
-                        color="#6B7280" 
+                      <Ionicons
+                        name={
+                          expandedStaff === member.id
+                            ? "chevron-up"
+                            : "chevron-down"
+                        }
+                        size={20}
+                        color="#6B7280"
                       />
                     </View>
-                    
+
                     {/* Contact Info */}
                     <View className="flex-row items-center mt-1">
                       <Ionicons name="mail-outline" size={14} color="#6B7280" />
-                      <Text className="text-xs text-gray-500 ml-1">{member.email}</Text>
+                      <Text className="text-xs text-gray-500 ml-1">
+                        {member.email}
+                      </Text>
                     </View>
                     <View className="flex-row items-center mt-1">
                       <Ionicons name="call-outline" size={14} color="#6B7280" />
-                      <Text className="text-xs text-gray-500 ml-1">{member.phone}</Text>
+                      <Text className="text-xs text-gray-500 ml-1">
+                        {member.phone}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -247,9 +276,17 @@ const StaffPage = () => {
                             Assigned: Jan 15, 2024
                           </Text>
                         </View>
-                        <View className={`px-2 py-1 rounded-full flex-row items-center ${getStatusColor("in-progress")}`}>
-                          <Ionicons name={getStatusIcon("in-progress")} size={12} color="currentColor" />
-                          <Text className="text-xs capitalize ml-1">In Progress</Text>
+                        <View
+                          className={`px-2 py-1 rounded-full flex-row items-center ${getStatusColor("in-progress")}`}
+                        >
+                          <Ionicons
+                            name={getStatusIcon("in-progress")}
+                            size={12}
+                            color="currentColor"
+                          />
+                          <Text className="text-xs capitalize ml-1">
+                            In Progress
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -265,11 +302,35 @@ const StaffPage = () => {
                             Assigned: Jan 14, 2024
                           </Text>
                         </View>
-                        <View className={`px-2 py-1 rounded-full flex-row items-center ${getStatusColor("completed")}`}>
-                          <Ionicons name={getStatusIcon("completed")} size={12} color="currentColor" />
-                          <Text className="text-xs capitalize ml-1">Completed</Text>
+                        <View
+                          className={`px-2 py-1 rounded-full flex-row items-center ${getStatusColor("completed")}`}
+                        >
+                          <Ionicons
+                            name={getStatusIcon("completed")}
+                            size={12}
+                            color="currentColor"
+                          />
+                          <Text className="text-xs capitalize ml-1">
+                            Completed
+                          </Text>
                         </View>
                       </View>
+                    </View>
+                    <View className="mt-4">
+                      <TouchableOpacity
+                        onPress={() => handleOpenChat(member.id, member.name)}
+                        className="bg-blue-600 py-3 rounded-xl flex-row items-center justify-center"
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons
+                          name="chatbubble-ellipses-outline"
+                          size={18}
+                          color="#FFFFFF"
+                        />
+                        <Text className="text-white font-semibold ml-2">
+                          Chat with {member.name}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
 
                     {/* No Tasks State */}
@@ -286,20 +347,34 @@ const StaffPage = () => {
                     </Text>
                     <View className="flex-row justify-between">
                       <View className="items-center">
-                        <Text className="text-lg font-bold text-gray-900">8</Text>
-                        <Text className="text-xs text-gray-500">Total Tasks</Text>
+                        <Text className="text-lg font-bold text-gray-900">
+                          8
+                        </Text>
+                        <Text className="text-xs text-gray-500">
+                          Total Tasks
+                        </Text>
                       </View>
                       <View className="items-center">
-                        <Text className="text-lg font-bold text-green-600">5</Text>
+                        <Text className="text-lg font-bold text-green-600">
+                          5
+                        </Text>
                         <Text className="text-xs text-gray-500">Completed</Text>
                       </View>
                       <View className="items-center">
-                        <Text className="text-lg font-bold text-yellow-600">3</Text>
-                        <Text className="text-xs text-gray-500">In Progress</Text>
+                        <Text className="text-lg font-bold text-yellow-600">
+                          3
+                        </Text>
+                        <Text className="text-xs text-gray-500">
+                          In Progress
+                        </Text>
                       </View>
                       <View className="items-center">
-                        <Text className="text-lg font-bold text-blue-600">95%</Text>
-                        <Text className="text-xs text-gray-500">Efficiency</Text>
+                        <Text className="text-lg font-bold text-blue-600">
+                          95%
+                        </Text>
+                        <Text className="text-xs text-gray-500">
+                          Efficiency
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -312,7 +387,9 @@ const StaffPage = () => {
             <View className="bg-gray-100 rounded-full p-4 mb-3">
               <Ionicons name="people-outline" size={32} color="#64748B" />
             </View>
-            <Text className="text-gray-500 text-lg font-medium">No staff found</Text>
+            <Text className="text-gray-500 text-lg font-medium">
+              No staff found
+            </Text>
             <Text className="text-gray-400 text-sm mt-1 text-center">
               No maintenance staff members added yet
             </Text>
