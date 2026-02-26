@@ -219,7 +219,7 @@ export default function Home() {
       style={{ backgroundColor: lightGray }}
     >
       <StatusBar
-        barStyle="dark-content"
+        barStyle="light-content"
         backgroundColor={lightGray}
       />
 

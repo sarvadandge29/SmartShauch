@@ -1,14 +1,23 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  StatusBar,
+  RefreshControl,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import StatusBadge from "@/components/StatusBadge";
-import ComplaintCard from "@/components/ComplaintCard";
 import StatsCard from "@/components/StatsCard";
 import ProfileForm from "@/components/ProfileForm";
+import ComplaintCard from "@/components/ComplaintCard";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+import { getUserFeedbacks } from "@/utils/actions";
 
-// Color constants
 const colors = {
   primary: "#1E3A8A",
   secondary: "#2563EB",
@@ -20,52 +29,41 @@ const colors = {
   background: "#F1F5F9",
 };
 
-// Mock user data
-const MOCK_USER = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+1 234 567 8900",
-};
-
-// Mock complaints data
-const MOCK_COMPLAINTS = [
-  {
-    id: "FB-005",
-    title: "Bad Smell",
-    status: "open" as const,
-    toiletId: "TL-002",
-    toiletName: "Central Park",
-    date: "Feb 21, 2026",
-  },
-  {
-    id: "FB-003",
-    title: "Dirty",
-    status: "resolved" as const,
-    toiletId: "TL-005",
-    toiletName: "Shopping District",
-    date: "Feb 20, 2026",
-  },
-  {
-    id: "FB-008",
-    title: "No Water",
-    status: "in-progress" as const,
-    toiletId: "TL-001",
-    toiletName: "Railway Station",
-    date: "Feb 19, 2026",
-  },
-];
-
 const Profile = () => {
-  const [user, setUser] = useState(MOCK_USER);
-  const [editedUser, setEditedUser] = useState(MOCK_USER);
-  const [isEditing, setIsEditing] = useState(false);
-  const [complaints] = useState(MOCK_COMPLAINTS);
+  const { user } = useAuth();
 
-  // Calculate stats
-  const totalReports = complaints.length;
-  const resolvedReports = complaints.filter(
-    (c) => c.status === "resolved",
-  ).length;
+  const [editedUser, setEditedUser] = useState(user);
+  const [isEditing, setIsEditing] = useState(false);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadFeedbacks();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadFeedbacks();
+    setRefreshing(false);
+  };
+
+  const loadFeedbacks = async () => {
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+
+      if (!authUser) return;
+
+      const data = await getUserFeedbacks(authUser.id);
+      setFeedbacks(data || []);
+    } catch (error) {
+      console.log("Profile fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditToggle = () => {
     setEditedUser(user);
@@ -74,15 +72,14 @@ const Profile = () => {
 
   const handleSaveChanges = () => {
     if (
-      !editedUser.name.trim() ||
-      !editedUser.email.trim() ||
-      !editedUser.phone.trim()
+      !editedUser.name?.trim() ||
+      !editedUser.email?.trim() ||
+      !editedUser.phone?.trim()
     ) {
       Alert.alert("Error", "All fields are required");
       return;
     }
 
-    setUser(editedUser);
     setIsEditing(false);
     Alert.alert("Success", "Profile updated successfully");
   };
@@ -92,16 +89,50 @@ const Profile = () => {
       { text: "Cancel", style: "cancel" },
       {
         text: "Logout",
-        onPress: () => router.replace("/(auth)/login"),
         style: "destructive",
+        onPress: async () => {
+          await supabase.auth.signOut();
+          router.replace("/(auth)/login");
+        },
       },
     ]);
-    const { error } = await supabase.auth.signOut();
   };
 
+  // Stats
+  const totalReports = feedbacks.length;
+  const resolvedReports = feedbacks.filter(
+    (f) => f.status === "resolved",
+  ).length; // if you later add status column
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ padding: 16 }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[colors.primary]} // Android spinner
+          tintColor={colors.primary} // iOS spinner
+        />
+      }
+    >
+      <StatusBar barStyle="dark-content" backgroundColor={colors.primary} />
+      <View style={{ padding: 16, marginTop: 16 }}>
         {/* Header */}
         <View
           style={{
@@ -109,15 +140,21 @@ const Profile = () => {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: 16,
+            marginTop: 16,
           }}
         >
           <Text
-            style={{ fontSize: 24, fontWeight: "bold", color: colors.primary }}
+            style={{
+              fontSize: 24,
+              fontWeight: "bold",
+              color: colors.primary,
+            }}
           >
             Profile
           </Text>
+
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={handleLogout}
             style={{
               width: 40,
               height: 40,
@@ -125,12 +162,13 @@ const Profile = () => {
               backgroundColor: colors.white,
               alignItems: "center",
               justifyContent: "center",
+              borderWidth: 1,
+              borderColor: "#FEE2E2",
             }}
           >
-            <Ionicons name="close" size={24} color={colors.gray} />
+            <Ionicons name="log-out-outline" size={20} color="#DC2626" />
           </TouchableOpacity>
         </View>
-
         {/* Profile Card */}
         <View
           style={{
@@ -142,7 +180,6 @@ const Profile = () => {
             borderColor: colors.lightGray,
           }}
         >
-          {/* Avatar */}
           <View style={{ alignItems: "center", marginBottom: 12 }}>
             <View
               style={{
@@ -155,12 +192,11 @@ const Profile = () => {
               }}
             >
               <Text style={{ fontSize: 24, color: colors.primary }}>
-                {user.name.charAt(0)}
+                {user?.name?.charAt(0)}
               </Text>
             </View>
           </View>
 
-          {/* User Info */}
           <Text
             style={{
               fontSize: 18,
@@ -169,8 +205,9 @@ const Profile = () => {
               color: colors.dark,
             }}
           >
-            {user.name}
+            {user?.name}
           </Text>
+
           <Text
             style={{
               fontSize: 14,
@@ -182,18 +219,11 @@ const Profile = () => {
             Citizen User
           </Text>
 
-          <View style={{ marginBottom: 8 }}>
-            <Text style={{ fontSize: 14, color: colors.dark }}>
-              {user.email}
-            </Text>
-          </View>
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, color: colors.dark }}>
-              {user.phone}
-            </Text>
-          </View>
+          <Text style={{ color: colors.dark }}>{user?.email}</Text>
+          <Text style={{ color: colors.dark, marginBottom: 16 }}>
+            {user?.phone}
+          </Text>
 
-          {/* Edit Button */}
           <TouchableOpacity
             onPress={handleEditToggle}
             style={{
@@ -223,7 +253,6 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Edit Form */}
         {isEditing && (
           <ProfileForm
             user={editedUser}
@@ -236,27 +265,35 @@ const Profile = () => {
         {/* Stats */}
         <StatsCard total={totalReports} resolved={resolvedReports} />
 
-        {/* Complaints Header */}
+        {/* Feedback Section */}
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center",
             marginBottom: 12,
           }}
         >
           <Text
             style={{ fontSize: 18, fontWeight: "600", color: colors.primary }}
           >
-            My Submitted Complaints
+            My Submitted Feedback
           </Text>
-          <Text style={{ color: colors.gray }}>{complaints.length} total</Text>
+          <Text style={{ color: colors.gray }}>{feedbacks.length} total</Text>
         </View>
 
-        {/* Complaints List */}
-        {complaints.length > 0 ? (
-          complaints.map((complaint) => (
-            <ComplaintCard key={complaint.id} complaint={complaint} />
+        {feedbacks.length > 0 ? (
+          feedbacks.map((item) => (
+            <ComplaintCard
+              key={item.id}
+              complaint={{
+                id: item.id.toString(),
+                title: item.issue_type,
+                status: "in-progress", // or resolved based on your data
+                toiletId: item.toilets?.id?.toString(),
+                toiletName: item.toilets?.name,
+                date: new Date(item.created_at).toLocaleDateString(),
+              }}
+            />
           ))
         ) : (
           <View
@@ -273,31 +310,10 @@ const Profile = () => {
               color={colors.gray}
             />
             <Text style={{ color: colors.gray, marginTop: 8 }}>
-              No complaints yet
+              No feedback submitted yet
             </Text>
           </View>
         )}
-
-        {/* Logout Button */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={{
-            backgroundColor: colors.white,
-            padding: 16,
-            borderRadius: 12,
-            marginTop: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: "#FEE2E2",
-          }}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#DC2626" />
-          <Text style={{ marginLeft: 8, fontWeight: "600", color: "#DC2626" }}>
-            Logout
-          </Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );

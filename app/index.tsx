@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   Text,
   View,
@@ -7,33 +7,37 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Fonts } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import { getFontFamily } from '@/utils/fonts';
+} from "react-native";
+import { router } from "expo-router";
+import { Fonts } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { getFontFamily } from "@/utils/fonts";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export default function App() {
-  const { session, loading } = useAuth();
+  const { session, loading, user } = useAuth();
 
-  const primaryBlue = '#1E3A8A';
-  const secondaryBlue = '#2563EB';
-  const white = '#FFFFFF';
+  const primaryBlue = "#1E3A8A";
+  const secondaryBlue = "#2563EB";
+  const white = "#FFFFFF";
 
   // Auto redirect if already logged in
   useEffect(() => {
     if (!loading && session) {
-      router.replace('/(tabs)/home');
+      if (user?.role === "admin") {
+        router.replace("/(admin)/dashboard");
+      }
+      if (user?.role === "user") {
+        router.replace("/(tabs)/home");
+      }
     }
   }, [session, loading]);
 
   const handleGetStarted = () => {
-    if (session) {
-      router.replace('/(tabs)/home');
-    } else {
-      router.push('/(auth)/login');
+    if (!session) {
+      router.push("/(auth)/login");
+      return;
     }
   };
 
@@ -44,8 +48,8 @@ export default function App() {
         style={{
           flex: 1,
           backgroundColor: primaryBlue,
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <StatusBar barStyle="light-content" backgroundColor={primaryBlue} />
@@ -56,12 +60,13 @@ export default function App() {
 
   return (
     <View style={{ flex: 1, backgroundColor: primaryBlue }}>
-      <StatusBar barStyle="light-content" backgroundColor={primaryBlue} />
-
       {/* Top Image Section */}
-      <View style={{ height: height * 0.65 }} className="justify-center items-center">
+      <View
+        style={{ height: height * 0.65 }}
+        className="justify-center items-center"
+      >
         <Image
-          source={require('@/assets/images/image.png')}
+          source={require("@/assets/images/image.png")}
           style={{ width: 530, height: 750 }}
           resizeMode="contain"
         />
@@ -71,7 +76,7 @@ export default function App() {
             style={{
               color: white,
               fontSize: 16,
-              fontFamily: getFontFamily('sans'),
+              fontFamily: getFontFamily("sans"),
             }}
           >
             1:00 AM
@@ -88,7 +93,7 @@ export default function App() {
           className="text-4xl font-bold text-center"
           style={{
             color: primaryBlue,
-            fontFamily: getFontFamily('serif'),
+            fontFamily: getFontFamily("serif"),
           }}
         >
           Smart Shauch
@@ -98,11 +103,11 @@ export default function App() {
           <Text
             className="text-base text-center leading-6"
             style={{
-              color: '#6B7280',
-              fontFamily: getFontFamily('sans'),
+              color: "#6B7280",
+              fontFamily: getFontFamily("sans"),
             }}
           >
-            Smart Public Toilet Monitoring{'\n'}
+            Smart Public Toilet Monitoring{"\n"}
             for Smart City
           </Text>
         </View>
@@ -116,7 +121,7 @@ export default function App() {
           >
             <Text
               className="text-white text-lg font-semibold tracking-wide"
-              style={{ fontFamily: getFontFamily('rounded') }}
+              style={{ fontFamily: getFontFamily("rounded") }}
             >
               GET STARTED
             </Text>
@@ -126,8 +131,8 @@ export default function App() {
         <Text
           className="text-xs text-center mt-8"
           style={{
-            color: '#9CA3AF',
-            fontFamily: getFontFamily('sans'),
+            color: "#9CA3AF",
+            fontFamily: getFontFamily("sans"),
           }}
         >
           Smart City Initiative v2.4
