@@ -29,13 +29,13 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const { user, profile } = await login(email, password);
+      const { profile } = await login(email, password);
 
-      if (user.role === "user") {
+      if (profile.role === "user") {
         router.replace("/(tabs)/home");
-      } else if (user.role === "admin") {
+      } else if (profile.role === "admin") {
         router.replace("/(admin)/dashboard" as any);
-      } else if (user.role === "maintenance") {
+      } else if (profile.role === "maintenance") {
         router.replace("/(maintenance)/home" as any);
       }
     } catch (error: any) {
