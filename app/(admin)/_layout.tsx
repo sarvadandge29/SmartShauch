@@ -2,6 +2,7 @@ import { StatusBar } from 'react-native';
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 const TabLayouts = () => {
   return (
@@ -63,6 +64,16 @@ const TabLayouts = () => {
                 size={24}
                 color={focused ? '#107ed1' : '#6B7280'}
               />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="all-staff"
+          options={{
+            title: 'Staff',
+            tabBarIcon: ({ focused }) => (
+              <FontAwesome6 name="people-group" size={24} color="black" />
             ),
           }}
         />
