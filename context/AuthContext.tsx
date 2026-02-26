@@ -36,6 +36,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (error) throw error;
 
+            console.log("Fetched user profile:", data);
             setUser(data);
         } catch (err: any) {
             setError(err.message);

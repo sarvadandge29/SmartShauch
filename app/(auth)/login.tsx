@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity, Alert } from "react-native";
-import React, { useState } from "react";
-import { router } from "expo-router";
+import { FormField } from "@/components/FormField";
 import { PrimaryButton } from "@/components/PrimaryButtton";
 import { TextLink } from "@/components/TextLink";
-import { FormField } from "@/components/FormField";
-import { getFontFamily } from '@/utils/fonts';
 import { login } from "@/utils/actions";
+import { getFontFamily } from "@/utils/fonts";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { Alert, Text, View } from "react-native";
 
 const Colors = {
   primaryBlue: "#1E3A8A",
@@ -31,7 +31,11 @@ const Login = () => {
 
       const { user, profile } = await login(email, password);
 
-      router.replace("/(tabs)/home");
+      if (user.role === "user") {
+        router.replace("/(tabs)/home");
+      } else if (user.role === "admin") {
+        router.replace("/(admin)/dashboard" as any);
+      }
     } catch (error: any) {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
     } finally {
@@ -87,7 +91,7 @@ const Login = () => {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          
+
           <FormField
             label="Password"
             placeholder="Enter your password"
@@ -109,7 +113,6 @@ const Login = () => {
             disabled={loading}
           />
         </View>
-
 
         {/* Footer */}
         <View className="mt-4 items-center">

@@ -127,3 +127,31 @@ export const getUserFeedbacks = async (userId: string) => {
 
   return data;
 };
+
+export const getAllFeedbacks = async () => {
+  const { data, error } = await supabase
+    .from("feedback")
+    .select(
+      `
+      id,
+      issue_type,
+      rating,
+      cleanliness,
+      comment,
+      created_at,
+      toilets (
+        id,
+        name,
+        address
+      )
+    `,
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching all feedback:", error);
+    throw error;
+  }
+
+  return data;
+};
